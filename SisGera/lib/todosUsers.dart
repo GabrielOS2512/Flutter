@@ -1,0 +1,154 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:pdm_sisgera/providers/users.dart';
+import 'package:provider/provider.dart';
+
+import 'exceptions/http_exception.dart';
+import 'main.dart';
+import 'main2.dart';
+import 'utils/app_routes.dart';
+
+class TodosUser extends StatelessWidget{
+  Future<void> _refreshBO(BuildContext context) {
+    return Provider.of<Users>(context, listen: false).loadUser();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final boData = Provider.of<Users>(context);
+    final bos = boData.items;final int n = boData.boCount;
+    const primaryColor = const Color(0xFF840000);
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: primaryColor,
+        title: Text('SisGera'),
+        actions: [
+
+          Sair()
+        ],
+
+      ),
+      drawer: DrawerM(),
+
+      body: RefreshIndicator(
+        onRefresh: () => _refreshBO(context),
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: Container(
+            margin: new EdgeInsets.all(20.0),
+            decoration: new BoxDecoration(
+              borderRadius: new BorderRadius.all(new Radius.circular(6.0)),
+              color: Color(0xFFF6F2F2),
+              boxShadow: [
+                new BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 15.0,
+                ),
+              ],
+            ),
+            child: Container(
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child:Text('Lista de Usuários',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),)
+                  ),
+                  Divider(
+                    color: primaryColor,
+                    thickness: 5.0,
+                  ),
+                  ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: boData.boCount,
+                    itemBuilder: (ctx, i) => Column(
+                      children: <Widget>[
+                        UItem(bos[i]),
+                        Divider(),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child:Text(n.toString() + ' - Usuários Carregados',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),)
+                  ),
+                  Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child:Text('Puxe do topo ao centro para atualizar',style: TextStyle(fontSize: 12),)
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class UItem extends StatelessWidget {
+  final User USUARIO;
+
+  UItem(this.USUARIO);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CachedNetworkImage(
+        imageUrl: USUARIO.foto,
+        placeholder: (context, url) => new CircularProgressIndicator(),
+        errorWidget: (context, url, error) => new Icon(Icons.error),
+      ),
+      title: Text(USUARIO.nome),
+      subtitle: Text(USUARIO.email),
+      // trailing: Container(
+      //   width: 100,
+      //   child: Row(
+      //     children: <Widget>[
+      //       IconButton(
+      //         icon: Icon(Icons.delete),
+      //         color: Theme.of(context).errorColor,
+      //         onPressed: () {
+      //           showDialog(
+      //             context: context,
+      //             builder: (ctx) => AlertDialog(
+      //               title: Text('Excluir Usuário'),
+      //               content: Text('Tem certeza?'),
+      //               actions: <Widget>[
+      //                 TextButton(
+      //                   child: Text('Não'),
+      //                   onPressed: () => Navigator.of(context).pop(false),
+      //                 ),
+      //                 TextButton(
+      //                   child: Text('Sim'),
+      //                   onPressed: () => Navigator.of(context).pop(true),
+      //                 ),
+      //               ],
+      //             ),
+      //           ).then((value) async {
+      //             if (value) {
+      //               try {
+      //                 await Provider.of<Users>(context, listen: false)
+      //                     .deleteUser(USUARIO.id);
+      //               } on HttpException catch (error) {
+      //                 ScaffoldMessenger.of(context).showSnackBar(
+      //                   SnackBar(
+      //                     content: Text(error.toString()),
+      //                   ),
+      //                 );
+      //               }
+      //             }
+      //           });
+      //         },
+      //       ),
+      //     ],
+      //   ),
+      // ),
+      onTap: (){
+        Navigator.of(context).pushNamed(AppRoutes.PERFILADM, arguments: USUARIO);
+      },
+    );
+  }
+}
