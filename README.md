@@ -1,2 +1,2 @@
 # Flutter
-Aplicações Multiplataforma usando o Flutter
+Aplicações Multiplataforma usando o Dart/Flutter
